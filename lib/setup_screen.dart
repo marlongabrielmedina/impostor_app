@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'game_state.dart';
-import 'instructions_screen.dart';
+import 'instructions_screen.dart'; // Importante para que funcione el botón de Comenzar Juego
 import 'themes_screen.dart';
 
-// Usamos un StatefulWidget porque necesitamos un "Controlador" para leer el texto del input
 class SetupScreen extends StatefulWidget {
   const SetupScreen({super.key});
 
@@ -13,14 +12,13 @@ class SetupScreen extends StatefulWidget {
 }
 
 class _SetupScreenState extends State<SetupScreen> {
-  // Este controlador lee lo que el usuario escribe en el campo de texto
   final TextEditingController _nameController = TextEditingController();
 
   void _addPlayer(GameState gameState) {
     final name = _nameController.text.trim();
     if (name.isNotEmpty) {
       gameState.addPlayer(name);
-      _nameController.clear(); // Limpiamos el input después de agregar
+      _nameController.clear();
     }
   }
 
@@ -32,13 +30,11 @@ class _SetupScreenState extends State<SetupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Aquí nos conectamos al "Cerebro". Cada vez que gameState cambie, esta pantalla se redibuja.
     final gameState = Provider.of<GameState>(context);
 
     return Scaffold(
-      // --- CÓDIGO NUEVO AÑADIDO AQUÍ ---
       appBar: AppBar(
-        backgroundColor: Colors.transparent, // Lo hace invisible para no romper tu diseño
+        backgroundColor: Colors.transparent, 
         elevation: 0,
         actions: [
           IconButton(
@@ -51,11 +47,10 @@ class _SetupScreenState extends State<SetupScreen> {
             },
           ),
         ],
-      ),      
-      // SafeArea evita que la interfaz se solape con la cámara o el notch del celular
+      ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24.0), // Equivalente a p-6 / p-8
+          padding: const EdgeInsets.all(24.0), 
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -65,10 +60,10 @@ class _SetupScreenState extends State<SetupScreen> {
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w900,
-                  color: Colors.blueAccent, // Equivalente a text-blue-400
+                  color: Colors.blueAccent, 
                 ),
               ),
-              const SizedBox(height: 8), // Un espaciador (como margin-bottom)
+              const SizedBox(height: 8), 
               const Text(
                 'Agrega de 3 a 10 jugadores para empezar.',
                 textAlign: TextAlign.center,
@@ -79,20 +74,19 @@ class _SetupScreenState extends State<SetupScreen> {
               // Fila para el input y el botón de "+"
               Row(
                 children: [
-                  // Expanded hace que el TextField ocupe todo el ancho disponible
                   Expanded(
                     child: TextField(
                       controller: _nameController,
                       decoration: InputDecoration(
                         hintText: 'Nombre del jugador',
                         filled: true,
-                        fillColor: Colors.grey[800], // bg-gray-700
+                        fillColor: Colors.grey[800],
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
                         ),
                       ),
-                      onSubmitted: (_) => _addPlayer(gameState), // Agrega al presionar Enter en el teclado
+                      onSubmitted: (_) => _addPlayer(gameState),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -120,7 +114,6 @@ class _SetupScreenState extends State<SetupScreen> {
                           style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
                         ),
                       )
-                    // ListView.builder es la forma óptima en móvil de renderizar listas
                     : ListView.builder(
                         itemCount: gameState.players.length,
                         itemBuilder: (context, index) {
@@ -129,7 +122,7 @@ class _SetupScreenState extends State<SetupScreen> {
                             margin: const EdgeInsets.only(bottom: 8),
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             decoration: BoxDecoration(
-                              color: Colors.blue[100], // bg-blue-100
+                              color: Colors.blue[100], 
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Row(
@@ -140,7 +133,7 @@ class _SetupScreenState extends State<SetupScreen> {
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.blue[900], // text-blue-800
+                                    color: Colors.blue[900], 
                                   ),
                                 ),
                                 IconButton(
@@ -155,30 +148,46 @@ class _SetupScreenState extends State<SetupScreen> {
               ),
               const SizedBox(height: 16),
 
+              // Selector de Modalidad Dibujo
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey[800]?.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: SwitchListTile(
+                  title: const Text(
+                    'Modalidad Dibujo',
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                  subtitle: const Text(
+                    'Filtra solo objetos abstractos/dibujables para jugar en papel real.',
+                    style: TextStyle(color: Colors.grey, fontSize: 13),
+                  ),
+                  secondary: Icon(
+                    Icons.palette, 
+                    color: gameState.isDrawingMode ? Colors.amber : Colors.grey
+                  ),
+                  value: gameState.isDrawingMode,
+                  onChanged: (bool value) {
+                    gameState.toggleDrawingMode(value);
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
+
               // Botón de comenzar
-
-
-
               ElevatedButton(
-                // Si la condición se cumple, se le asigna una función vacía por ahora. 
-                // Si es nulo (null), Flutter deshabilita el botón automáticamente.
                 onPressed: (gameState.players.length >= 3 && gameState.players.length <= 10)
                     ? () {
                         Navigator.push(
-                        context,
-                        // MaterialPageRoute genera la animación nativa (deslizar en iOS, fade/zoom en Android)
-                        MaterialPageRoute(builder: (context) => const InstructionsScreen()),
+                          context,
+                          MaterialPageRoute(builder: (context) => const InstructionsScreen()),
                         );
-                    }
+                      }
                     : null,
- 
- 
- 
- 
- 
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green[600], // bg-green-600
-                  disabledBackgroundColor: Colors.grey[700], // opacity-50 cursor-not-allowed
+                  backgroundColor: Colors.green[600], 
+                  disabledBackgroundColor: Colors.grey[700], 
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -189,18 +198,10 @@ class _SetupScreenState extends State<SetupScreen> {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
               ),
-
-
-
             ],
           ),
         ),
       ),
     );
-
-
-
-
-
   }
 }

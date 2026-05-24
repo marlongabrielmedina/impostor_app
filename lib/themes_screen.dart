@@ -11,12 +11,16 @@ class ThemesScreen extends StatefulWidget {
 
 class _ThemesScreenState extends State<ThemesScreen> {
   final TextEditingController _themeController = TextEditingController();
+  bool _isForDrawing = true; // Estado local para el checkbox de la nueva categoría
 
   void _addTheme(GameState gameState) {
     final theme = _themeController.text.trim();
     if (theme.isNotEmpty) {
-      gameState.addTheme(theme);
+      gameState.addTheme(theme, _isForDrawing);
       _themeController.clear();
+      setState(() {
+        _isForDrawing = true; // Reiniciamos el checkbox a true
+      });
     }
   }
 
@@ -40,14 +44,14 @@ class _ThemesScreenState extends State<ThemesScreen> {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            // Input para nuevos temas
+            // Fila de Texto de entrada
             Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: _themeController,
                     decoration: InputDecoration(
-                      hintText: 'Nuevo tema (Ej. Marcas de Zapatos)',
+                      hintText: 'Nuevo tema...',
                       filled: true,
                       fillColor: Colors.grey[800],
                       border: OutlineInputBorder(
@@ -63,14 +67,29 @@ class _ThemesScreenState extends State<ThemesScreen> {
                   onPressed: () => _addTheme(gameState),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue[600],
-                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   child: const Icon(Icons.add, color: Colors.white),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 8),
+            
+            // --- NUEVO: Checkbox para marcar si es apto para dibujo ---
+            CheckboxListTile(
+              title: const Text('¿Este tema es apto para la modalidad de dibujo?', style: TextStyle(fontSize: 14)),
+              value: _isForDrawing,
+              dense: true,
+              activeColor: Colors.blueAccent,
+              contentPadding: EdgeInsets.zero,
+              onChanged: (val) {
+                setState(() {
+                  _isForDrawing = val ?? true;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
             
             // Lista de temas existentes
             Expanded(
@@ -88,11 +107,24 @@ class _ThemesScreenState extends State<ThemesScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          theme,
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.amber[900]),
+                        // Nombre del tema + Indicador visual si es de dibujo
+                        Row(
+                          children: [
+                            if (theme.isForDrawing)
+                              Icon(Icons.palette, size: 18, color: Colors.amber[900])
+                            else
+                              Icon(Icons.record_voice_over, size: 18, color: Colors.blue[900]),
+                            const SizedBox(width: 8),
+                            Text(
+                              theme.name,
+                              style: TextStyle(
+                                fontSize: 16, 
+                                fontWeight: FontWeight.bold, 
+                                color: theme.isForDrawing ? Colors.amber[900] : Colors.blue[900]
+                              ),
+                            ),
+                          ],
                         ),
-                        // Botón de eliminar (deshabilitado si solo queda 1 tema)
                         IconButton(
                           icon: Icon(
                             Icons.delete, 

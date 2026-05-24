@@ -1,46 +1,57 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 
+// Estructura para el tema
+class GameTheme {
+  final String name;
+  final bool isForDrawing;
+
+  GameTheme({required this.name, required this.isForDrawing});
+}
+
 class GameState extends ChangeNotifier {
-  // --- Variables Globales (Lo que tenías en JS) ---
   List<String> players = [];
   int impostorIndex = -1;
   int currentPlayerIndex = 0;
   String currentTheme = '';
+  
+  bool isDrawingMode = false; 
 
-  // Lista de temas
-// --- Temas del Juego ---
-  // Quitamos la palabra "final"
-  List<String> themes = [
-    'Comidas Típicas',
-    'Animales de la Selva',
-    'Marcas de Carros',
-    'Películas de Disney',
-    'Superhéroes de Marvel',
+  List<GameTheme> themes = [
+    GameTheme(name: 'Animales de la Selva', isForDrawing: true),
+    GameTheme(name: 'Objetos de la Casa', isForDrawing: true),
+    GameTheme(name: 'Frutas y Verduras', isForDrawing: true),
+    GameTheme(name: 'Marcas de Carros', isForDrawing: false),
+    GameTheme(name: 'Películas de Disney', isForDrawing: false),
+    GameTheme(name: 'Canciones de Ricky Martin', isForDrawing: false),
   ];
 
-  void addTheme(String newTheme) {
-    // Evitamos agregar temas vacíos o repetidos
-    if (newTheme.isNotEmpty && !themes.contains(newTheme)) {
-      themes.add(newTheme);
+  // --- Funciones de Modalidad y Temas ---
+  void toggleDrawingMode(bool value) {
+    isDrawingMode = value;
+    notifyListeners();
+  }
+
+  void addTheme(String name, bool isForDrawing) {
+    bool exists = themes.any((t) => t.name.toLowerCase() == name.toLowerCase());
+    if (name.isNotEmpty && !exists) {
+      themes.add(GameTheme(name: name, isForDrawing: isForDrawing));
       notifyListeners();
     }
   }
 
   void removeTheme(int index) {
-    // Es buena idea dejar al menos 1 tema para que el juego no falle al iniciar
     if (themes.length > 1) {
       themes.removeAt(index);
       notifyListeners();
     }
   }
 
-  // --- Funciones del Juego ---
-
+  // --- Funciones de Jugadores (¡Las que faltaban!) ---
   void addPlayer(String name) {
     if (name.isNotEmpty && players.length < 10) {
       players.add(name);
-      notifyListeners(); // Esto le dice a la UI que se redibuje
+      notifyListeners(); 
     }
   }
 
@@ -49,16 +60,22 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
+  // --- Funciones del Flujo del Juego ---
   void startRound() {
     final random = Random();
     impostorIndex = random.nextInt(players.length);
-    currentTheme = themes[random.nextInt(themes.length)];
+    
+    final List<GameTheme> availableThemes = isDrawingMode
+        ? themes.where((t) => t.isForDrawing).toList()
+        : themes;
+
+    if (availableThemes.isEmpty) {
+      currentTheme = 'Tema por defecto (Agrega temas de dibujo)';
+    } else {
+      currentTheme = availableThemes[random.nextInt(availableThemes.length)].name;
+    }
+
     currentPlayerIndex = 0;
-    
-    // En Flutter, es buena práctica imprimir en consola con 'debugPrint'
-    debugPrint('Impostor: ${players[impostorIndex]}');
-    debugPrint('Tema: $currentTheme');
-    
     notifyListeners();
   }
 

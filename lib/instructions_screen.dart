@@ -8,17 +8,16 @@ class InstructionsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Aquí nos conectamos al estado, pero con "listen: false".
-    // Como esta pantalla no necesita redibujarse si los datos cambian,
-    // solo queremos el acceso para poder llamar a la función startRound().
-    final gameState = Provider.of<GameState>(context, listen: false);
+    // Al quitar el "listen: false", la pantalla puede leer los cambios de estado
+    // como la modalidad de dibujo que configuramos en la pantalla anterior.
+    final gameState = Provider.of<GameState>(context);
 
     return Scaffold(
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center, // Centramos verticalmente
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Text(
@@ -27,7 +26,7 @@ class InstructionsScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Colors.amber, // Equivalente a text-yellow-400
+                  color: Colors.amber, 
                 ),
               ),
               const SizedBox(height: 32),
@@ -42,27 +41,33 @@ class InstructionsScreen extends StatelessWidget {
                     BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 5))
                   ],
                 ),
-                child: const Column(
+                child: Column(
                   children: [
-                    Text(
+                    const Text(
                       '¡Hay un IMPOSTOR entre ustedes!',
                       style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 18),
                       textAlign: TextAlign.center,
                     ),
-                    SizedBox(height: 16),
-                    Text(
+                    const SizedBox(height: 16),
+                    const Text(
                       'Se asignará un impostor al azar. Todos los demás recibirán un tema secreto.',
                       style: TextStyle(color: Colors.white70, fontSize: 16),
                       textAlign: TextAlign.center,
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
+                    
+                    // --- AQUÍ ESTÁ LA MAGIA CONDICIONAL ---
                     Text(
-                      'Por turnos, cada uno dirá una palabra relacionada con el tema. El impostor no conoce el tema y debe intentar camuflarse.',
-                      style: TextStyle(color: Colors.white70, fontSize: 16),
+                      gameState.isDrawingMode 
+                          ? 'Por turnos, cada uno hará un trazo o línea en un papel relacionado con el tema. El impostor no lo conoce e intentará camuflarse en el dibujo.'
+                          : 'Por turnos, cada uno dirá una palabra relacionada con el tema. El impostor no conoce el tema y debe intentar camuflarse.',
+                      style: const TextStyle(color: Colors.amberAccent, fontSize: 16, fontWeight: FontWeight.w600),
                       textAlign: TextAlign.center,
                     ),
-                    SizedBox(height: 12),
-                    Text(
+                    // --------------------------------------
+
+                    const SizedBox(height: 12),
+                    const Text(
                       'Después de la ronda, discutan y voten para encontrar al impostor.',
                       style: TextStyle(color: Colors.white70, fontSize: 16),
                       textAlign: TextAlign.center,
@@ -75,21 +80,13 @@ class InstructionsScreen extends StatelessWidget {
               // Botón para iniciar la ronda
               ElevatedButton(
                 onPressed: () {
-                // 1. Ejecutamos la lógica para elegir tema e impostor
-                gameState.startRound();
-                
-                // 2. Navegamos a la pantalla de turnos usando pushReplacement
-                // Usamos pushReplacement en lugar de push para que no puedan 
-                // regresar a las instrucciones deslizando hacia atrás.
-                Navigator.pushReplacement(
+                  gameState.startRound();
+                  
+                  Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => const TurnScreen()),
-                );
+                  );
                 },
-
-
-
-
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue[600],
                   padding: const EdgeInsets.symmetric(vertical: 20),
