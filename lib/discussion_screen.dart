@@ -19,9 +19,10 @@ class _DiscussionScreenState extends State<DiscussionScreen> {
   Widget build(BuildContext context) {
     final gameState = Provider.of<GameState>(context);
     
-    // Obtenemos el nombre del impostor desde el cerebro del juego
-    final impostorName = gameState.players[gameState.impostorIndex];
-
+    // --- SOLUCIÓN: Lectura segura (Evita el RangeError) ---
+    final impostorName = (gameState.players.isNotEmpty && gameState.impostorIndex != -1)
+        ? gameState.players[gameState.impostorIndex]
+        : '';
     return Scaffold(
       body: SafeArea(
         child: Padding(
